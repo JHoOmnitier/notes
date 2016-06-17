@@ -1,0 +1,30 @@
+
+go test -run=TestBasicMutilateMem -timeout 900h -OffServAddr=10.0.0.10 -OffCliAddr=10.0.0.10 -ServerTerminateOptions="TerminateOnly"
+
+go test -run=TestBasicYCSBMem -timeout 900h -OffServAddr=10.0.0.10 -OffCliAddr=10.0.0.10 -ServerTerminateOptions="TerminateOnly"
+
+
+1. you will want to comment out all the notification stuff for this TestBasicYCSBMem test
+
+tools/appsQATest/Test_Suites/JSON/ServerSettings/ES_skyriver.json
+2. you will want to remove line: "connHdlr.inOrderCmpl": "true",
+3. change "driveCache.numDrives": "2"
+
+4. ServerConfig/ES_Test_Skyriver_memcached.json
+"PrefixCmd" = ""	<= Numa
+
+cd ~/GoWorkspace/src/
+mkdir -p github.com/OmniTier/skyriver
+git clone https://github.com/OmniTier/tools.git
+git clone https://github.com/OmniTier/skyriver.git
+cd ~/GoWorkspace/src/github.com/OmniTier/skyriver
+
+ln -s ~/GoWorkspace/src/github.com/OmniTier/tools/ tools
+
+go get github.com/dustin/go-humanize
+go get golang.org/x/crypto/ssh
+go get gopkg.in/inconshreveable/log15.v2
+
+cd ../tools/jobSch/dispatcher/
+vim resource.go 
+
