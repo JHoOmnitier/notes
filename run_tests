@@ -28,3 +28,39 @@ go get gopkg.in/inconshreveable/log15.v2
 cd ../tools/jobSch/dispatcher/
 vim resource.go 
 
+*******************************
+test pprof
+https://groups.google.com/forum/#!topic/golang-nuts/uoe6yYqmeyY
+
+
+go test -run=TestBasicYCSBMem -timeout 900h -OffServAddr=10.0.0.10 -OffCliAddr=10.0.0.10 -ServerTerminateOptions="TerminateOnly" -cpuprofile cpu.prof
+ => create cpu.prof
+
+go test -c -run=TestBasicYCSBMem -timeout 900h -OffServAddr=10.0.0.10 -OffCliAddr=10.0.0.10 -ServerTerminateOptions="TerminateOnly"
+ => create Basic.test
+
+go tool pprof ./Basic.test cpu.prof 
+
+*******************************
+test trace
+https://golang.org/cmd/trace
+
+go test -trace trace.out -run=TestBasicYCSBMem -timeout 900h -OffServAddr=10.0.0.10 -OffCliAddr=10.0.0.10 -ServerTerminateOptions="TerminateOnly"
+ => create trace.out
+
+go tool trace ./Basic.test trace.out 
+ => create a web server
+
+use browser to check the server
+
+*******************************
+callgraph
+
+go get golang.org/x/tools/cmd/callgraph
+
+cd golang.org/x/tools/cmd/callgraph
+go build
+
+~/GoWorkspace/src/github.com/OmniTier/tools/appsQATest$ callgraph -algo=static -test Test_Suites/Basic/basic_test.go > /tmp/callgraph.out
+
+
