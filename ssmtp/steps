@@ -1,0 +1,21 @@
+# http://nramkumar.org/tech/blog/2014/02/06/sending-automated-mail-through-office365-from-ubuntu/
+may need ssh server
+
+sudo apt-get -y install ssmtp
+
+cp ${PATH}/ssmtp/ssmtp.conf /etc/ssmtp/ssmtp.conf
+
+modify ssmtp.conf
+	hostname= [your linux hostname]
+
+
+sudo ssmtp [recipient email address]
+
+	FROM: Automatic.Notification@omnitier.com
+	To: [recipient email address]
+	CC: [rec1, rec2, ...]
+	Subject: [subject]
+
+	[Body of the mail]
+
+'Ctrl+D'
