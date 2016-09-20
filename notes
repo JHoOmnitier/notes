@@ -1,0 +1,15 @@
+sudo groupadd docker
+sudo usermod -aG docker $USER
+
+ 2008  history | grep n1023
+ 2009  source /home/regression/.gvm/scripts/gvm; gvm use 1.6; gvm pkgset use  n1010; cd $GOPATH/src/github.com/OmniTier/
+ 2010  cd tools/
+ 2011  git checkout master
+ 2012  git pull
+ 2013  git checkout dockerFlagsFix
+ 2014  git pull
+ 2015  cd appsQATest/
+ 2016  cd Test_Suites/
+ 2017  cd ES_Tests/
+ 2018  go test -v -run=TestWorkloadTransientNonProxy -InstanceConfigPath="ES_mutilate_Kfb_Vfb_128_RateDistributions_66cap_short" -TestConfig="template_docker"  -timeout 999h
+
