@@ -13,3 +13,5 @@ sudo usermod -aG docker $USER
  2017  cd ES_Tests/
  2018  go test -v -run=TestWorkloadTransientNonProxy -InstanceConfigPath="ES_mutilate_Kfb_Vfb_128_RateDistributions_66cap_short" -TestConfig="template_docker"  -timeout 999h
 
+go test -run=TestWorkloadTransientNonProxy -InstanceConfigPath="ES_mutilate_Kfb_Vfb_128_RateDistributions_66cap_short" -TestConfig="template_docker_on"  -timeout 999h
+
