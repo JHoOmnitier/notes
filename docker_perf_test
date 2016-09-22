@@ -1,0 +1,15 @@
+server on host
+$ taskset 0x3 iperf -s
+
+client on host
+$ taskset 0x2 iperf -c localhost
+
+client on docker --net host
+?? taskset ?? docker run -ti --rm --net host ubuntu:buildBase /bin/bash
+# taskset 0x5 iperf -c localhost
+
+client on docker bridge
+?? taskset ?? docker run -ti --rm ubuntu:buildBase /bin/bash
+# taskset 0x5 iperf -c 192.168.111.10
+
+client on docker --net container 

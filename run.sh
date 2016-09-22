@@ -37,4 +37,5 @@
 # go test -run=TestBasicMemaslap -timeout 900h -OffServAddr=10.0.0.10 -ClientServerLink=10.0.0.10:10.0.0.10 -ServerTerminateOptions="TerminateOnly" -Recipients="James.Ho@omnitier.com"
 
 # create Test_Suites/JSON/TestSystemConfig/james.json
-go test -v -run=TestBasicMemaslap -TestConfig="james" -BypassJobSch=false
+go test -v -run=TestBasicMemaslap -TestConfig="james" -BypassJobSch=false -Recipients=James.Ho@omnitier.com
+
