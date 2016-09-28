@@ -1,0 +1,11 @@
+./Test_Suites/Debug/mutilate_perf_test.go
+	TestPerfMutilateSweepMulti()
+		err := common.InstancedStandardBenchmarkFlow(common.PerfLoopMutilateMulti, "TestPerfMutilateSweepMulti", "loop_simple_mutilate_memcached")
+
+			bench_workflow.go/ExecuteSingleBenchmarkPhase()
+				bench_workflow_mutilate.go/BasicExecuteSIngleMutPhase()
+			||
+			ExecuteSingleBenchmarkPhaseComplex
+
+	TestSteadyPerfMutilateSweepMulti()
+		err := common.InstancedStandardBenchmarkFlow(common.PerfLoopMutilateMultiSteady, "TestSteadyPerfMutilateSweepMulti", "loop_simple_mutilate_memcached")
