@@ -1,0 +1,7 @@
+cp config93GB.json config.json
+numactl -l -N 0 ./skyriver  -debugDirectory=n1022/logs_0
+
+
+/home/regression/tools/mutilateGA
+./mutilate -s 10.0.0.22 -d 1 -c 128 -T 12 -t 600 -r 10000 -V 1000000 -K 13 -u 1.000000 --noload --affinity
+
