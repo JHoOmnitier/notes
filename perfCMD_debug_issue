@@ -6,3 +6,23 @@ numactl -l -N 0 ./skyriver  -debugDirectory=n1022/logs_0
 ./mutilate -s 10.0.0.22 -d 1 -c 128 -T 12 -t 600 -r 10000 -V 1000000 -K 13 -u 1.000000 --noload --affinity
 
 iostat or bmon
+
+
+/proc/sys/net/ipv4$ cat tcp_rmem 
+4096	87380	6291456
+
+/proc/sys/net/core$ cat rmem_default 
+212992
+regression@n1022:/proc/sys/net/core$ cat rmem_max 
+212992
+regression@n1022:/proc/sys/net/core$ cat wmem_default 
+212992
+regression@n1022:/proc/sys/net/core$ cat wmem_max 
+212992
+regression@n1022:/proc/sys/net/core$ cat optmem_max 
+20480
+regression@n1022:/proc/sys/net/core$ cat netdev_max_backlog 
+1000
+
+sysctl -a | grep mem
+$ sudo sysctl -w net.ipv4.tcp_rmem='4096 87380 32765'
