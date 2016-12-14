@@ -25,4 +25,19 @@ regression@n1022:/proc/sys/net/core$ cat netdev_max_backlog
 1000
 
 sysctl -a | grep mem
+net.core.optmem_max = 20480
+net.core.rmem_default = 212992
+net.core.rmem_max = 212992
+net.core.wmem_default = 212992
+net.core.wmem_max = 212992
+
+net.ipv4.tcp_mem = 6189357	8252476	12378714
+net.ipv4.tcp_rmem = 4096	87380	6291456
+net.ipv4.tcp_wmem = 4096	16384	4194304
+net.ipv4.udp_mem = 12378714	16504952	24757428
+net.ipv4.udp_rmem_min = 4096
+net.ipv4.udp_wmem_min = 4096
+
+net.ipv4.tcp_no_metrics_save = 0
+
 $ sudo sysctl -w net.ipv4.tcp_rmem='4096 87380 32765'
