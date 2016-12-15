@@ -82,9 +82,13 @@ cd fbthrift/thrift/
 autoreconf -if
 ./configure
 make
+make install
 
 # mcrouter
 autoreconf --install
+
+export THRIFT2_COMP_DIR=~/GoWorkspace/src/github.com/fbthrift/thrift/lib/cpp2
+
 ./configure
 make
 make install
