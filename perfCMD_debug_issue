@@ -65,17 +65,17 @@ bmon
 numactl --localalloc --cpunodebind=0 ./mutilate -s 10.0.0.33 -d 1 -c 128 -T 12 -t 600 -r 10000 -V 1000000 -K 13 -u 1.000000 --noload --affinity
 numactl --localalloc --cpunodebind=1 ./mutilate -s 10.0.0.33 -d 1 -c 128 -T 12 -t 600 -r 10000 -V 1000000 -K 13 -u 1.000000 --noload --affinity
 
- # result: 1 instance
+# result1: 1 instance
 nvme1n1        8657.50    513328.00    533248.00    1026656    1066496
 nvme0n1        8791.00    396462.00    665216.00     792924    1330432
   p27p2                        │   1.15GiB 813.63K     │   4.76MiB  75.36K
 
-# result: 2 instances from 2 servers
+# result2: 2 instances from 2 servers
 nvme1n1        2183.50    131924.00    131072.00     263848     262144
 nvme0n1        2122.50     31564.00    223360.00      63128     446720
   p27p2                        │ 390.12MiB 270.40K     │   6.00MiB  82.21K
 
-# result: 2 instances from 1 server
+# result3: 2 instances from 1 server
 numactl --localalloc --cpunodebind=1
 nvme1n1        9997.50    604292.00    620544.00    1208584    1241088
 nvme0n1        9559.00    664528.00    497984.00    1329056     995968
@@ -89,10 +89,56 @@ nvme1n1        3217.50    132024.00    262144.00     264048     524288
 nvme0n1        2686.50    262988.00     64320.00     525976     128640
   p27p2                        │ 479.50MiB 332.34K     │   5.82MiB  82.69K
 
-# result: 1 instance and 1 iperf
+# result4: 1 instance and 1 iperf
 nvme1n1        3049.00    244454.00    131072.00     488908     262144
 nvme0n1        2185.50    131958.00    131072.00     263916     262144
   p27p2                        │   1.05GiB 746.16K     │   6.59MiB  90.38K
+
+# result5: 1 instance, but double the connections & threads
+./mutilate -s 10.0.0.33 -d 1 -c 256 -T 24 -t 600 -r 10000 -V 1000000 -K 13 -u 1.000000 --noload --affinity
+nvme1n1        4601.00    320812.00    242176.00     641624     484352
+nvme0n1        4832.50    263594.00    327360.00     527188     654720
+  p27p2                        │ 530.85MiB 367.94K     │   6.82MiB  95.81K
+
+# result6: 1 instance, double the threads
+nvme1n1        4314.50    263480.00    262144.00     526960     524288
+nvme0n1        5047.50    263568.00    355008.00     527136     710016
+  p27p2                        │ 503.60MiB 349.06K     │   5.82MiB  81.62K
+
+# result7: new mutilate cmd to reduce connections
+numactl --localalloc --cpunodebind=0 ./mutilate -s 10.0.0.33 -d 1 -c 8 -T 12 -t 600 -r 10000 -V 1000000 -K 13 -u 1.000000 --noload --affinity
+numactl --localalloc --cpunodebind=1 ./mutilate -s 10.0.0.33 -d 1 -c 8 -T 12 -t 600 -r 10000 -V 1000000 -K 13 -u 1.000000 --noload --affinity
+
+# result7: 1 instance
+nvme1n1        8511.50    457376.00    569664.00     914752    1139328
+nvme0n1        8714.50    527462.00    526784.00    1054924    1053568
+  p27p2                        │   1.15GiB 814.25K     │  10.32MiB 163.59K
+
+# result8: 2 instances from 1 server
+nvme1n1        8974.00    437334.00    649344.00     874668    1298688
+nvme0n1       10126.50    653058.00    581312.00    1306116    1162624
+ p27p2                        │   1.15GiB 814.26K     │  12.92MiB 205.12K
+
+# result9: 2 instances from 2 servers
+nvme1n1        2737.00     68044.00    262144.00     136088     524288
+nvme0n1        3237.00    263178.00    131072.00     526356     262144
+  p27p2                        │ 363.20MiB 251.92K     │   4.27MiB  58.34K
+
+# result10: 1 instance, 1 iperf from 1 server
+nvme1n1        9414.00    625370.00    524288.00    1250740    1048576
+nvme0n1        9086.50    528750.00    575104.00    1057500    1150208
+  p27p2                        │   1.15GiB 814.13K     │  11.14MiB 176.47K
+
+# result11: 1 instance, i iperf from 2 servers
+nvme1n1        6948.50    526428.00    321024.00    1052856     642048
+nvme0n1        5955.00    264298.00    456576.00     528596     913152
+  p27p2                        │   1.14GiB 812.62K     │   8.66MiB 120.28K
+
+# new setting: change net.ipv4.tcp_rmem='4096 8192 16384' instead of '4096 87380 6291456'
+# result12: 1 instance, 2 iperf from 2 servers
+nvme1n1        9566.50    658454.00    505856.00    1316908    1011712
+nvme0n1        9213.00    603478.00    514432.00    1206956    1028864
+  p27p2                        │   1.11GiB 839.46K     │  12.30MiB 186.97K
 
 net.ipv4.tcp_mem = 6188841	8251789	12377682
 net.ipv4.tcp_rmem = 4096	87380	6291456
@@ -116,6 +162,12 @@ net.core.default_qdisc = pfifo_fast
 
 sudo sysctl -w net.core.rmem_max=67108864
 sudo sysctl -w net.core.wmem_max=67108864
+sudo sysctl -w 
+sudo sysctl -w
+sudo sysctl -w net.ipv4.tcp_congestion_control=htcp
+sudo sysctl -w net.ipv4.tcp_mtu_probing=1
+sudo sysctl -w net.core.default_qdisc=fq
+sudo sysctl -w
 
 # allow testing with buffers up to 64MB 
 net.core.rmem_max = 67108864 
@@ -129,3 +181,123 @@ net.ipv4.tcp_congestion_control=htcp
 net.ipv4.tcp_mtu_probing=1
 # recommended for CentOS7/Debian8 hosts
 net.core.default_qdisc = fq
+
+
+# tools installed
+sudo apt-get install perf
+sudo apt-get install linux-tools-common
+sudo apt-get install linux-tools-4.4.0-53-generic
+sudo apt-get install gdb
+
+# perf top  
+# 16k 2 instances 2 servers
+   6.91%  skyriver                   [.] runtime.runqgrab
+   4.13%  skyriver                   [.] runtime.findrunnable
+   4.01%  [kernel]                   [k] copy_user_enhanced_fast_string
+   2.85%  [unknown]                  [k] 0x00000000004b3f20
+   1.99%  skyriver                   [.] runtime/internal/atomic.Load
+   1.82%  skyriver                   [.] runtime.runqsteal
+   1.78%  [kernel]                   [k] _raw_spin_lock
+   1.66%  [kernel]                   [k] ixgbe_clean_rx_irq
+   1.64%  [kernel]                   [k] native_write_msr_safe
+   1.63%  [kernel]                   [k] _raw_spin_lock_irqsave
+   1.36%  [kernel]                   [k] update_cfs_shares
+   1.30%  [kernel]                   [k] __get_page_tail
+   1.27%  [kernel]                   [k] __nf_conntrack_find_get
+   1.27%  skyriver                   [.] runtime/internal/atomic.Cas
+   1.25%  skyriver                   [.] runtime.runqempty
+   1.19%  skyriver                   [.] runtime/internal/atomic.Xchg
+   1.11%  [kernel]                   [k] copy_page_to_iter_iovec
+   1.00%  [kernel]                   [k] native_queued_spin_lock_slowpath
+   0.93%  [kernel]                   [k] menu_select
+   0.90%  [kernel]                   [k] sock_rfree
+   0.90%  [kernel]                   [k] effective_load.isra.43
+   0.90%  [kernel]                   [k] __fget
+   0.87%  [kernel]                   [k] __schedule
+   0.84%  [kernel]                   [k] put_compound_page
+   0.82%  [kernel]                   [k] update_curr
+   0.73%  [kernel]                   [k] native_irq_return_iret
+   0.73%  [kernel]                   [k] cpuidle_enter_state
+   0.67%  [kernel]                   [k] set_next_entity
+   0.66%  [kernel]                   [k] int_sqrt
+   0.63%  [kernel]                   [k] gup_pte_range
+   0.61%  [kernel]                   [k] dequeue_entity
+   0.61%  [kernel]                   [k] compound_unlock_irqrestore
+   0.61%  skyriver                   [.] runtime.memmove
+
+# 6M 2 instances 2 servers
+   7.56%  [kernel]                   [k] copy_user_enhanced_fast_string
+   4.24%  [unknown]                  [k] 0x00000000004b3f20
+   2.94%  [kernel]                   [k] ixgbe_clean_rx_irq
+   2.87%  skyriver                   [.] runtime.runqgrab
+   2.50%  [kernel]                   [k] __get_page_tail
+   1.60%  [kernel]                   [k] dev_gro_receive
+   1.59%  [kernel]                   [k] _raw_spin_lock
+   1.59%  skyriver                   [.] runtime.findrunnable
+   1.58%  [kernel]                   [k] put_compound_page
+   1.47%  [kernel]                   [k] copy_page_to_iter_iovec
+   1.26%  skyriver                   [.] runtime.memmove
+   1.23%  [kernel]                   [k] native_write_msr_safe
+   1.20%  [kernel]                   [k] put_page
+   1.16%  [kernel]                   [k] put_page_testzero
+   1.13%  [kernel]                   [k] compound_unlock_irqrestore
+   1.12%  [kernel]                   [k] cpuidle_enter_state
+   1.11%  [kernel]                   [k] _raw_spin_lock_irqsave
+   0.97%  [kernel]                   [k] menu_select
+   0.88%  [kernel]                   [k] native_irq_return_iret
+   0.88%  [kernel]                   [k] __nf_conntrack_find_get
+   0.87%  skyriver                   [.] runtime/internal/atomic.Load
+   0.79%  [kernel]                   [k] update_cfs_shares
+   0.72%  skyriver                   [.] runtime.runqsteal
+   0.72%  [kernel]                   [k] ixgbe_poll
+   0.71%  [kernel]                   [k] int_sqrt
+   0.68%  [kernel]                   [k] nf_iterate
+   0.66%  [kernel]                   [k] native_queued_spin_lock_slowpath
+   0.65%  [kernel]                   [k] __free_page_frag
+   0.63%  [kernel]                   [k] __build_skb
+   0.59%  [unknown]                  [k] 0x00000000004b3f2e
+   0.58%  [kernel]                   [k] inet_gro_receive
+   0.55%  [kernel]                   [k] __schedule
+   0.55%  [kernel]                   [k] eth_get_headlen
+   0.53%  [kernel]                   [k] get_page_from_freelist
+   0.52%  [kernel]                   [k] tcp_gro_receive
+   0.50%  skyriver                   [.] runtime.runqempty
+   0.50%  [kernel]                   [k] skb_copy_datagram_iter
+   0.50%  [kernel]                   [k] memcpy_erms
+
+# 6M 2 instances 1 server
+   6.55%  skyriver                   [.] runtime.runqgrab
+   5.69%  [kernel]                   [k] copy_user_enhanced_fast_string
+   3.86%  skyriver                   [.] runtime.findrunnable
+   2.82%  [unknown]                  [k] 0x00000000004b3f20
+   1.86%  skyriver                   [.] runtime/internal/atomic.Load
+   1.80%  [kernel]                   [k] native_write_msr_safe
+   1.78%  [kernel]                   [k] ixgbe_clean_rx_irq
+   1.66%  skyriver                   [.] runtime.runqsteal
+   1.64%  [kernel]                   [k] __get_page_tail
+   1.52%  [kernel]                   [k] _raw_spin_lock
+   1.46%  [kernel]                   [k] copy_page_to_iter_iovec
+   1.42%  [kernel]                   [k] _raw_spin_lock_irqsave
+   1.37%  [kernel]                   [k] update_cfs_shares
+   1.25%  skyriver                   [.] runtime/internal/atomic.Cas
+   1.16%  skyriver                   [.] runtime/internal/atomic.Xchg
+   1.15%  skyriver                   [.] runtime.runqempty
+   1.10%  skyriver                   [.] runtime.memmove
+
+# ps auwxf | grep skyriver
+regress+ 35335  102  1.9 17544400 10448176 pts/0 Sl+ 10:38 288:15  |           \_ ./skyriver -debugDirectory=n1033/logs_0
+regress+ 44857  0.0  0.0  11748  2144 pts/7    S+   15:19   0:00              \_ grep --color=auto skyriver
+
+# ps auwxf | grep skyriver | awk '{print $2}'
+35335
+44861
+
+$ sudo perf top -vzp 35335
+  12.84%  /proc/kcore                                             0x7fff813e7685     k [k] copy_user_enhanced_fast_string
+   7.08%  [unknown]                                               0x4b3f20           ! [k] 0x00000000004b3f20
+   5.16%  /home/regression/Skyriver_Binary/Kessel1.0rc3/skyriver  0x8e616            d [.] runtime.runqgrab
+   4.43%  /proc/kcore                                             0x7fff811937e2     k [k] __get_page_tail
+   2.80%  /home/regression/Skyriver_Binary/Kessel1.0rc3/skyriver  0x87ee7            d [.] runtime.findrunnable
+   2.71%  /proc/kcore                                             0x7fff813eeb72     k [k] copy_page_to_iter_iovec
+   2.71%  /proc/kcore                                             0x7fff81192e8e     k [k] put_compound_page
+
