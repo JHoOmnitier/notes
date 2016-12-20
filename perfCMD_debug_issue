@@ -184,7 +184,7 @@ net.core.default_qdisc = fq
 
 
 # tools installed
-sudo apt-get install perf
+sudo apt-get install iperf
 sudo apt-get install linux-tools-common
 sudo apt-get install linux-tools-4.4.0-53-generic
 sudo apt-get install gdb
@@ -300,4 +300,205 @@ $ sudo perf top -vzp 35335
    2.80%  /home/regression/Skyriver_Binary/Kessel1.0rc3/skyriver  0x87ee7            d [.] runtime.findrunnable
    2.71%  /proc/kcore                                             0x7fff813eeb72     k [k] copy_page_to_iter_iovec
    2.71%  /proc/kcore                                             0x7fff81192e8e     k [k] put_compound_page
+
+/tmp$ gdb skyriver 
+
+(gdb) info symbol 0x4b3f20
+runtime.memmove + 160 in section .text
+
+(gdb) disassemble 0x4b3f00
+Dump of assembler code for function runtime.memmove:
+   0x00000000004b3e80 <+0>:	mov    0x8(%rsp),%rdi
+   0x00000000004b3e85 <+5>:	mov    0x10(%rsp),%rsi
+   0x00000000004b3e8a <+10>:	mov    0x18(%rsp),%rbx
+   0x00000000004b3e8f <+15>:	test   %rbx,%rbx
+   0x00000000004b3e92 <+18>:	je     0x4b3f3a <runtime.memmove+186>
+   0x00000000004b3e98 <+24>:	cmp    $0x2,%rbx
+   0x00000000004b3e9c <+28>:	jbe    0x4b408e <runtime.memmove+526>
+   0x00000000004b3ea2 <+34>:	cmp    $0x4,%rbx
+   0x00000000004b3ea6 <+38>:	jbe    0x4b4216 <runtime.memmove+918>
+   0x00000000004b3eac <+44>:	cmp    $0x8,%rbx
+   0x00000000004b3eb0 <+48>:	jb     0x4b4209 <runtime.memmove+905>
+   0x00000000004b3eb6 <+54>:	je     0x4b4202 <runtime.memmove+898>
+   0x00000000004b3ebc <+60>:	cmp    $0x10,%rbx
+   0x00000000004b3ec0 <+64>:	jbe    0x4b41f1 <runtime.memmove+881>
+   0x00000000004b3ec6 <+70>:	cmp    $0x20,%rbx
+   0x00000000004b3eca <+74>:	jbe    0x4b41dc <runtime.memmove+860>
+   0x00000000004b3ed0 <+80>:	cmp    $0x40,%rbx
+   0x00000000004b3ed4 <+84>:	jbe    0x4b41b1 <runtime.memmove+817>
+   0x00000000004b3eda <+90>:	cmp    $0x80,%rbx
+   0x00000000004b3ee1 <+97>:	jbe    0x4b415a <runtime.memmove+730>
+   0x00000000004b3ee7 <+103>:	cmp    $0x100,%rbx
+   0x00000000004b3eee <+110>:	jbe    0x4b409b <runtime.memmove+539>
+   0x00000000004b3ef4 <+116>:	cmp    %rdi,%rsi
+   0x00000000004b3ef7 <+119>:	jbe    0x4b4040 <runtime.memmove+448>
+   0x00000000004b3efd <+125>:	cmp    $0x800,%rbx
+   0x00000000004b3f04 <+132>:	jbe    0x4b3f3b <runtime.memmove+187>
+   0x00000000004b3f06 <+134>:	testl  $0x200,0x84f0b0(%rip)        # 0xd02fc0 <runtime.cpuid_ebx7>
+   0x00000000004b3f10 <+144>:	je     0x4b3f23 <runtime.memmove+163>
+   0x00000000004b3f12 <+146>:	mov    %esi,%eax
+   0x00000000004b3f14 <+148>:	or     %edi,%eax
+   0x00000000004b3f16 <+150>:	test   $0x7,%eax
+   0x00000000004b3f1b <+155>:	je     0x4b3f23 <runtime.memmove+163>
+   0x00000000004b3f1d <+157>:	mov    %rbx,%rcx
+=> 0x00000000004b3f20 <+160>:	rep movsb %ds:(%rsi),%es:(%rdi)
+   0x00000000004b3f22 <+162>:	retq   
+   0x00000000004b3f23 <+163>:	mov    %rbx,%rcx
+   0x00000000004b3f26 <+166>:	shr    $0x3,%rcx
+   0x00000000004b3f2a <+170>:	and    $0x7,%rbx
+---Type <return> to continue, or q <return> to quit---
+=> 0x00000000004b3f2e <+174>:	rep movsq %ds:(%rsi),%es:(%rdi)
+
+$ cd /tmp
+$ sudo perf record -F 99 -p 13583 -g -- sleep 5
+$ sudo perf report -n
+
+Samples: 6K of event 'cycles:pp', Event count (approx.): 318976310692                                           
+  Children      Self       Samples  Command   Shared Object      Symbol                                         
++   71.01%     0.00%             0  skyriver  skyriver           [.] runtime.goexit
++   56.11%     0.00%             0  skyriver  skyriver           [.] main.(*ConnectionHandler).receiveRequestASC
++   56.11%     0.00%             0  skyriver  skyriver           [.] main.(*ConnectionHandler).(main.receiveRequ
++   56.11%     0.00%             0  skyriver  skyriver           [.] main.(*ConnectionHandler).serve
++   55.00%     0.00%             0  skyriver  skyriver           [.] main.(*ConnectionHandler).receiveArgumentsA
++   54.97%     0.00%             0  skyriver  skyriver           [.] main.(*ConnectionHandler).receiveStorageFmt
++   54.79%     0.85%            13  skyriver  skyriver           [.] github.com/OmniTier/skyriver/slab/readBuffe
++   53.85%     0.34%             6  skyriver  skyriver           [.] net.(*netFD).Read
++   53.50%     0.01%             1  skyriver  skyriver           [.] net.(*conn).Read
++   51.30%     0.75%            20  skyriver  [kernel.kallsyms]  [k] entry_SYSCALL_64_fastpath
++   48.14%     0.07%             4  skyriver  skyriver           [.] runtime.mcall
++   47.61%     0.19%             1  skyriver  skyriver           [.] runtime.park_m
++   47.49%     0.00%             0  skyriver  skyriver           [.] net.(*pollDesc).waitRead
++   47.15%     0.00%             0  skyriver  skyriver           [.] net.(*pollDesc).wait
++   47.14%     0.00%             0  skyriver  skyriver           [.] net.runtime_pollWait
++   47.08%     0.00%             1  skyriver  skyriver           [.] runtime.schedule
++   46.18%     0.14%             2  skyriver  skyriver           [.] runtime.netpollblock
++   40.31%     4.45%            91  skyriver  skyriver           [.] runtime.findrunnable
++   21.66%     0.33%             7  skyriver  [kernel.kallsyms]  [k] vfs_read
++   21.04%     0.00%             1  skyriver  [kernel.kallsyms]  [k] __vfs_read
++   21.04%     0.10%             3  skyriver  [kernel.kallsyms]  [k] new_sync_read
++   20.72%     0.11%             4  skyriver  skyriver           [.] syscall.Syscall
++   17.22%     0.00%             0  skyriver  [kernel.kallsyms]  [k] sys_read
++   16.77%     0.00%             1  skyriver  skyriver           [.] runtime.futex
++   16.29%     0.00%             0  skyriver  [kernel.kallsyms]  [k] sys_futex
++   16.28%     0.00%             1  skyriver  [kernel.kallsyms]  [k] do_futex
++   15.72%     0.56%             7  skyriver  [kernel.kallsyms]  [k] sock_read_iter
++   15.60%     0.00%             0  skyriver  [unknown]          [k] 0000000000000000
++   15.16%     0.00%             1  skyriver  [kernel.kallsyms]  [k] sock_recvmsg
++   14.93%     0.15%             3  skyriver  [kernel.kallsyms]  [k] inet_recvmsg
++   14.90%     2.10%            34  skyriver  skyriver           [.] runtime.runqsteal
++   14.13%     0.55%            10  skyriver  [kernel.kallsyms]  [k] tcp_recvmsg
+
+
++   63.56%     0.00%             0  skyriver  skyriver           [.] runtime.goexit
++   55.73%     0.05%             3  skyriver  [kernel.kallsyms]  [k] entry_SYSCALL_64_fastpath
++   47.89%     0.15%             1  skyriver  skyriver           [.] main.(*ConnectionHandler).serve
++   47.74%     0.00%             0  skyriver  skyriver           [.] main.(*ConnectionHandler).(main.receiveRequ
++   47.45%     0.00%             0  skyriver  skyriver           [.] main.(*ConnectionHandler).receiveRequestASC
++   46.64%     0.00%             0  skyriver  skyriver           [.] main.(*ConnectionHandler).receiveArgumentsA
++   46.41%     0.00%             0  skyriver  skyriver           [.] main.(*ConnectionHandler).receiveStorageFmt
++   45.98%     0.06%             1  skyriver  skyriver           [.] github.com/OmniTier/skyriver/slab/readBuffe
++   38.04%     0.01%             1  skyriver  skyriver           [.] net.(*conn).Read
++   37.75%     0.01%             2  skyriver  skyriver           [.] net.(*netFD).Read
++   37.66%     0.00%             0  skyriver  skyriver           [.] syscall.Syscall
++   35.78%     0.00%             0  skyriver  skyriver           [.] runtime.mcall
++   35.61%     0.00%             0  skyriver  skyriver           [.] runtime.park_m
++   35.18%     0.18%             2  skyriver  skyriver           [.] runtime.schedule
++   33.64%     0.00%             0  skyriver  [kernel.kallsyms]  [k] sys_read
++   33.53%     0.00%             0  skyriver  [kernel.kallsyms]  [k] vfs_read
++   33.09%     0.28%             1  skyriver  [kernel.kallsyms]  [k] new_sync_read
++   33.09%     0.00%             0  skyriver  [kernel.kallsyms]  [k] __vfs_read
++   32.21%     0.00%             1  skyriver  skyriver           [.] net.(*pollDesc).waitRead
++   32.01%     0.00%             0  skyriver  skyriver           [.] net.(*pollDesc).wait
++   32.01%     0.00%             0  skyriver  skyriver           [.] net.runtime_pollWait
++   31.76%     0.18%             1  skyriver  [kernel.kallsyms]  [k] sock_read_iter
++   31.57%     0.00%             0  skyriver  [kernel.kallsyms]  [k] sock_recvmsg
++   31.46%     0.37%             2  skyriver  skyriver           [.] runtime.netpollblock
++   31.13%     0.23%             2  skyriver  [kernel.kallsyms]  [k] inet_recvmsg
++   30.44%     1.12%             8  skyriver  [kernel.kallsyms]  [k] tcp_recvmsg
++   28.02%     1.65%            29  skyriver  skyriver           [.] runtime.findrunnable
++   21.76%     1.19%             9  skyriver  [kernel.kallsyms]  [k] skb_copy_datagram_iter
++   20.58%     0.04%             2  skyriver  [kernel.kallsyms]  [k] copy_page_to_iter
++   18.57%     0.00%             0  skyriver  [unknown]          [k] 0000000000000000
++   16.85%     0.00%             0  skyriver  skyriver           [.] main.workOnProtocol
++   16.56%     0.00%             0  skyriver  skyriver           [.] main.processProtocol
++   15.93%     5.27%            43  skyriver  skyriver           [.] runtime.memmove
++   15.58%     0.00%             1  skyriver  [kernel.kallsyms]  [k] __irqentry_text_start
++   15.58%     0.00%             0  skyriver  [kernel.kallsyms]  [k] ret_from_intr
++   15.43%     0.00%             1  skyriver  [kernel.kallsyms]  [k] __do_softirq
++   15.18%     0.00%             1  skyriver  [kernel.kallsyms]  [k] net_rx_action
++   15.03%     0.00%             0  skyriver  skyriver           [.] main.rmwWriteFill
++   15.01%     1.06%             9  skyriver  [kernel.kallsyms]  [k] ixgbe_poll
++   14.89%     0.00%             0  skyriver  [kernel.kallsyms]  [k] irq_exit
++   13.70%     0.00%             0  skyriver  skyriver           [.] main.(*ConnectionHandler).worker
++   12.65%    12.65%            92  skyriver  [kernel.kallsyms]  [k] copy_user_enhanced_fast_string
++   12.10%     1.95%            21  skyriver  skyriver           [.] runtime.runqsteal
++   10.00%     0.00%             1  skyriver  skyriver           [.] runtime.futex
++    9.98%     0.01%             2  skyriver  [kernel.kallsyms]  [k] sys_futex
++    9.97%     0.00%             1  skyriver  [kernel.kallsyms]  [k] do_futex
++    8.18%     0.41%             2  skyriver  [kernel.kallsyms]  [k] schedule
++    7.84%     0.25%             3  skyriver  skyriver           [.] runtime.epollwait
++    7.69%     1.52%            26  skyriver  [kernel.kallsyms]  [k] ixgbe_clean_rx_irq
++    7.67%     7.67%            46  skyriver  [unknown]          [k] 0x00000000004b3f20
++    7.43%     0.38%             4  skyriver  [kernel.kallsyms]  [k] __schedule
++    7.30%     5.38%            67  skyriver  skyriver           [.] runtime.runqgrab
++    7.24%     0.00%             1  skyriver  [kernel.kallsyms]  [k] sys_epoll_wait
++    7.12%     0.00%             1  skyriver  [kernel.kallsyms]  [k] napi_gro_complete
++    6.87%     0.00%             0  skyriver  [kernel.kallsyms]  [k] ep_poll
++    6.64%     0.00%             0  skyriver  [kernel.kallsyms]  [k] netif_receive_skb_internal
++    6.63%     0.00%             0  skyriver  [kernel.kallsyms]  [k] __netif_receive_skb
++    6.63%     0.01%             3  skyriver  [kernel.kallsyms]  [k] __netif_receive_skb_core
++    6.62%     0.01%             2  skyriver  [kernel.kallsyms]  [k] ip_rcv
++    6.55%     0.00%             0  skyriver  [kernel.kallsyms]  [k] __kfree_skb
++    6.23%     0.00%             0  skyriver  [kernel.kallsyms]  [k] skb_release_all
++    5.68%     0.00%             0  skyriver  [kernel.kallsyms]  [k] napi_gro_flush
++    5.42%     2.52%            17  skyriver  [kernel.kallsyms]  [k] put_page
++    5.36%     0.01%             2  skyriver  [kernel.kallsyms]  [k] futex_wait
++    5.17%     0.24%             2  skyriver  [kernel.kallsyms]  [k] ip_rcv_finish
++    4.92%     0.47%             4  skyriver  [kernel.kallsyms]  [k] skb_release_data
++    4.77%     0.00%             0  skyriver  [kernel.kallsyms]  [k] ip_local_deliver
++    4.60%     0.01%             2  skyriver  [kernel.kallsyms]  [k] futex_wait_queue_me
++    4.47%     0.00%             0  skyriver  [kernel.kallsyms]  [k] tcp_v4_do_rcv
++    4.47%     0.01%             2  skyriver  [kernel.kallsyms]  [k] tcp_rcv_established
++    4.41%     0.00%             1  skyriver  [kernel.kallsyms]  [k] futex_wake
++    4.31%     0.00%             0  skyriver  [kernel.kallsyms]  [k] ip_local_deliver_finish
+
+
+$ go tool pprof skyriver profile.2s6m  
+Entering interactive mode (type "help" for commands)
+(pprof) top10
+18590ms of 22020ms total (84.42%)
+Dropped 99 nodes (cum <= 110.10ms)
+Showing top 10 nodes out of 85 (cum >= 1580ms)
+      flat  flat%   sum%        cum   cum%
+    5650ms 25.66% 25.66%     6070ms 27.57%  syscall.Syscall
+    4080ms 18.53% 44.19%     4090ms 18.57%  syscall.Syscall6
+    2910ms 13.22% 57.40%     2910ms 13.22%  runtime.memmove
+    1780ms  8.08% 65.49%     1780ms  8.08%  runtime.futex
+    1560ms  7.08% 72.57%     1560ms  7.08%  runtime.epollwait
+     930ms  4.22% 76.79%     1350ms  6.13%  runtime.runqgrab
+     680ms  3.09% 79.88%     6850ms 31.11%  runtime.findrunnable
+     410ms  1.86% 81.74%      410ms  1.86%  runtime/internal/atomic.Load
+     360ms  1.63% 83.38%      360ms  1.63%  runtime/internal/atomic.Cas
+     230ms  1.04% 84.42%     1580ms  7.18%  runtime.runqsteal
+
+
+$ go tool pprof skyriver profile.2s32k 
+Entering interactive mode (type "help" for commands)
+(pprof) top10
+45740ms of 54640ms total (83.71%)
+Dropped 123 nodes (cum <= 273.20ms)
+Showing top 10 nodes out of 73 (cum >= 660ms)
+      flat  flat%   sum%        cum   cum%
+   18660ms 34.15% 34.15%    19820ms 36.27%  syscall.Syscall
+    6700ms 12.26% 46.41%     6700ms 12.26%  runtime.futex
+    5490ms 10.05% 56.46%     5500ms 10.07%  syscall.Syscall6
+    4830ms  8.84% 65.30%     4830ms  8.84%  runtime.memmove
+    3470ms  6.35% 71.65%     3470ms  6.35%  runtime.epollwait
+    2430ms  4.45% 76.10%     3290ms  6.02%  runtime.runqgrab
+    1790ms  3.28% 79.37%    19700ms 36.05%  runtime.findrunnable
+     900ms  1.65% 81.02%      900ms  1.65%  runtime/internal/atomic.Load
+     810ms  1.48% 82.50%      810ms  1.48%  runtime/internal/atomic.Cas
+     660ms  1.21% 83.71%      660ms  1.21%  runtime/internal/atomic.Xchg
+
+sudo tcpdump -i p27p2 -w /tmp/2s32k.pcap
 
