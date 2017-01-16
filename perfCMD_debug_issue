@@ -37,6 +37,7 @@ net.ipv4.tcp_wmem = 4096	16384	4194304
 net.ipv4.udp_mem = 12378714	16504952	24757428
 net.ipv4.udp_rmem_min = 4096
 net.ipv4.udp_wmem_min = 4096
+net.ipv4.tcp_window_scaling = 1
 
 net.ipv4.tcp_no_metrics_save = 0
 
@@ -158,6 +159,7 @@ net.ipv4.tcp_available_congestion_control = cubic reno
 net.ipv4.tcp_congestion_control = cubic
 net.ipv4.tcp_mtu_probing = 0
 net.core.default_qdisc = pfifo_fast
+net.ipv4.tcp_moderate_rcvbuf = 1
 
 
 sudo sysctl -w net.core.rmem_max=67108864
@@ -501,4 +503,45 @@ Showing top 10 nodes out of 73 (cum >= 660ms)
      660ms  1.21% 83.71%      660ms  1.21%  runtime/internal/atomic.Xchg
 
 sudo tcpdump -i p27p2 -w /tmp/2s32k.pcap
+
+netstat -s | grep retransmited
+netstat -s
+cat /proc/net/netstat
+ss -i
+
+2i 2s 
+cat /proc/net/sockstat
+sockets: used 532
+TCP: inuse 12 orphan 0 tw 4 alloc 211 mem 16900
+UDP: inuse 12 mem 5
+UDPLITE: inuse 0
+RAW: inuse 0
+FRAG: inuse 0 memory 0
+
+2i 1s
+cat /proc/net/sockstat
+sockets: used 532
+TCP: inuse 12 orphan 0 tw 0 alloc 211 mem 21166
+UDP: inuse 12 mem 5
+UDPLITE: inuse 0
+RAW: inuse 0
+FRAG: inuse 0 memory 0
+
+sudo sysctl -w net.ipv4.tcp_moderate_rcvbuf=0
+cat /proc/net/sockstat
+sockets: used 532
+TCP: inuse 12 orphan 0 tw 4 alloc 211 mem 2746
+UDP: inuse 12 mem 5
+UDPLITE: inuse 0
+RAW: inuse 0
+FRAG: inuse 0 memory 0
+
+ sudo sysctl -w net.ipv4.tcp_rmem='4096 16384 16384'
+cat /proc/net/sockstat
+sockets: used 527
+TCP: inuse 11 orphan 0 tw 6 alloc 210 mem 653
+UDP: inuse 12 mem 5
+UDPLITE: inuse 0
+RAW: inuse 0
+FRAG: inuse 0 memory 0
 
