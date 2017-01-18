@@ -73,3 +73,7 @@ tcp    ESTAB      0      549785                                                 
 tcp    ESTAB      0      439657                                                                                         10.0.0.35:50042  10.0.0.37:11211   
 	 cubic wscale:7,7 rto:204 rtt:0.202/0.12 ato:40 mss:1448 ssthresh:2 send 114.7Mbps unacked:7 retrans:1/474 lost:1 sacked:5 fackets:6 rcv_space:29200
 
+# sudo perf top -vzp <pid>
+# sudo perf record -F 99 -p 13583 -g -- sleep 5
+# sudo perf report -n
+
