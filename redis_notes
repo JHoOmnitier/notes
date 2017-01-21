@@ -1,0 +1,8 @@
+# docker
+$ docker run --name myredis -d --net host redis
+telnet 127.0.0.1 6379
+docker kill myredis
+docker rm myredis
+
+docker exec -ti myredis /bin/bash
+redis_cli
