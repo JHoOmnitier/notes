@@ -1,0 +1,26 @@
+-   53.98%     0.00%             0  skyriver  [kernel.kallsyms]    [k] 0xffffffff817fe876
+   - 0xffffffff817fe876                                            t entry_SYSCALL_64_fastpath
+      - 32.83% 0xffffffff811ff156                                  T SyS_read
+         - 31.31% 0xffffffff811fe37f                               T vfs_read
+            - 31.16% 0xffffffff811fddd7                            T __vfs_read 
+               - 31.00% 0xffffffff811fdd85                         
+                  - 30.92% 0xffffffff816dd6a5                      t sock_read_iter
+                     - 30.20% 0xffffffff816dd60b                   T sock_recvmsg
+                        - 30.07% 0xffffffff8177111f                T inet_recvmsg
+                           - 19.62% 0xffffffff81744788             T tcp_recvmsg
+                              - 17.71% 0xffffffff816ec101          T skb_copy_datagram_iter
+                                 - 0xffffffff813eccf6              T copy_page_to_iter
+                                      12.61% 0xffffffff813e5685    T copy_user_enhanced_fast_string
+
+ffffffff817fe860 t entry_SYSCALL_64_fastpath
+	ffffffff811ff110 T SyS_read
+	ffffffff811ff110 T sys_read
+		ffffffff811fe300 T vfs_read
+			ffffffff811fddb0 T __vfs_read
+				ffffffff816dd620 t sock_read_iter
+					ffffffff816dd5d0 T sock_recvmsg
+						ffffffff817710b0 T inet_recvmsg
+							ffffffff81744580 T tcp_recvmsg
+								ffffffff816ebfb0 T skb_copy_datagram_iter
+									ffffffff813e5680 T copy_user_enhanced_fast_string
+
