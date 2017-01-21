@@ -1,0 +1,13 @@
+$ docker run --name mymemcached -d --net host memcached
+
+$ telnet 127.0.0.1 11211
+set hello 0 900 4
+data
+STORED
+get hello
+VALUE hello 0 4
+data
+END
+quit
+Connection closed by foreign host.
+
