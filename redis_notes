@@ -6,3 +6,10 @@ docker rm myredis
 
 docker exec -ti myredis /bin/bash
 redis_cli
+
+set hello world
+get hello
+quit
+
+$ sudo tcpdump -vv -i eth1 'port 6379'
+$ sudo tcpdump -w /tmp/redis.pcap  -i eth1 'port 6379'

@@ -11,3 +11,6 @@ END
 quit
 Connection closed by foreign host.
 
+
+$ sudo tcpdump -w /tmp/memcached.pcap -i eth1 'port 11211'
+
