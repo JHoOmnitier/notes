@@ -13,3 +13,6 @@ quit
 
 $ sudo tcpdump -vv -i eth1 'port 6379'
 $ sudo tcpdump -w /tmp/redis.pcap  -i eth1 'port 6379'
+
+~/tools/redis-3.2.6/src$ ./redis-server --protected-mode no
+
