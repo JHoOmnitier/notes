@@ -21,9 +21,6 @@ git checkout master
 git pull
 git checkout otrest
 git pull
-
 cd appsQATest/Test_Suites/Basic
-
-
 go test -run=TestBasicYCSBMem -timeout 900h -OffServAddr=10.0.0.39 -ClientServerLink=10.0.0.37:10.0.0.39 -Recipients="James.Ho@omnitier.com"
 
