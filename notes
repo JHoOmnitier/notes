@@ -15,3 +15,15 @@ sudo usermod -aG docker $USER
 
 go test -run=TestWorkloadTransientNonProxy -InstanceConfigPath="ES_mutilate_Kfb_Vfb_128_RateDistributions_66cap_short" -TestConfig="template_docker_on"  -timeout 999h
 
+
+source /home/automation/.gvm/scripts/gvm; gvm use 1.8.1; gvm pkgset use n1037; cd $GOPATH/src/github.com/OmniTier/tools
+git checkout master
+git pull
+git checkout otrest
+git pull
+
+cd appsQATest/Test_Suites/Basic
+
+
+go test -run=TestBasicYCSBMem -timeout 900h -OffServAddr=10.0.0.39 -ClientServerLink=10.0.0.37:10.0.0.39 -Recipients="James.Ho@omnitier.com"
+
