@@ -1,9 +1,50 @@
+https://www.youtube.com/watch?v=6bXSfjwQVIc
+https://www.youtube.com/watch?v=SarNFYPOinQ
+https://www.youtube.com/watch?v=wHWb1d_VGp8
+# elasticsearch webinars
+# https://www.elastic.co/webinars/getting-started-elasticsearch?baymax=default&elektra=docs&storm=top-video
+# kibana
+# https://www.elastic.co/webinars/getting-started-kibana?baymax=default&elektra=docs&storm=top-video
+# logstash
+# https://www.elastic.co/webinars/getting-started-logstash?baymax=default&elektra=docs&storm=top-video
+#
 docker pull docker.elastic.co/kibana/kibana:5.4.0
 docker run --name some-kibana -e ELASTICSEARCH_URL=http://some-elasticsearch:9200 -p 5601:5601 -d kibana
 
+
+
+#///////////////////// Start docker //////////////////////////////////////////
 # Elastic Search
 docker run -d -p 9200:9200 -p 9300:9300 -it -h elasticsearch --name elasticsearch elasticsearch
+
+# verify elasticsearch status
 curl http://localhost:9200/
+
+	# create an index, where to store our data
+	#!/bin/bash
+	curl -X POST --data-binary @- localhost:9200/wordismic <<EOF
+	{
+	  "event": {
+	    "_timestamp": {
+	      "enabled": true,
+	      "path": "timestamp"
+	    }
+	  }
+	}
+
+	curl localhost:9200/wordismic
+
+	# import JSON via bulk API
+	#!/bin/bash 
+	rm -f /tmp/events.json
+	echo -n "Indexing $1..."
+	while read LINE; do
+	  echo '{"index":{"_index":"wordismic","_type":"event"}}' >> /tmp/events.json
+	  echo $LINE >> /tmp/events.json
+	done <"$1"
+	curl -s -X POST --data-binary @/tmp/events.json 'localhost:9200/_bulk' >/dev/null
+	rm /tmp/events.json
+	echo " done."
 
 # Kibana
 docker run -d -p 5601:5601 -h kibana --name kibana --link elasticsearch:elasticsearch kibana
@@ -11,3 +52,134 @@ browser: http://localhost:5601/
 
 # LogStash
 docker run -h logstash --name logstash --link elasticsearch:elasticsearch -it --rm -v "$PWD":/config-dir logstash -f /config-dir/logstash.conf
+
+
+#///////////////////// Kibana //////////////////////////////////////////
+# How to put a visualization directly in Kibana/ElasticSearch
+https://discuss.elastic.co/t/how-to-put-a-visualization-directly-in-kibana-elasticsearch/48325
+
+# Kibana console
+GET /
+
+POST /my-index/my-type/1
+{
+  "body":"foo"
+}
+
+GET /my-index/my-type/1
+
+GET /my-index/_search
+{
+  "query": {
+    "match": {
+      "body": "foo"
+    }
+  }
+}
+
+DELETE /my-index/my-type/1
+
+PUT /library
+{
+  "settings": {
+    "index.number_of_shards":1,
+    "index.number_of_replicas":0
+  }
+}
+
+POST /library/books/_bulk
+{"index":{"_id":1}}
+{"title":"The quick brown fox", "price":5,"colors":["red","green","blue"]}
+{"index":{"_id":2}}
+{"title":"The quick brown fox jumps over the lazy dog", "price":15, "colors":["blue","yellow"]}
+{"index":{"_id":3}}
+{"title":"The quick brown fox jumps over the quick dog", "price":8, "colors":["red","blue"]}
+{"index":{"_id":4}}
+{"title":"Brown fox brown dog", "price":2, "colors":["black","yellow","red","blue"]}
+{"index":{"_id":5}}
+{"title":"Lazy dog", "price":9, "colors":["red","blue", "green"]}
+
+GET /library/books/_search
+
+GET /library/books/_search
+{
+  "query": {
+    "match": {
+      "title": "fox"
+    }
+  }
+}
+
+# https://www.elastic.co/guide/en/elasticsearch/reference/1.4/_updating_documents.html
+curl -XPOST 'localhost:9200/customer/external/1/_update?pretty' -d '
+{
+  "doc": { "name": "Jane Doe" }
+}'
+
+# http://www.elasticsearchtutorial.com/elasticsearch-in-5-minutes.html
+curl -XPUT 'n1010:9200/blog/user/dilbert'  -d '{ "name" : "Dilbert Brown" }'
+
+curl -XPUT 'n1010:9200/blog/post/1'  -d '
+{
+    "user": "dilbert",
+    "postDate": "2011-12-15",
+    "body": "Search is hard. Search should be easy." ,
+    "title": "On search"
+}'
+curl -XPUT 'n1010:9200/blog/post/2'  -d '
+{
+    "user": "dilbert",
+    "postDate": "2011-12-12",
+    "body": "Distribution is hard. Distribution should be easy." ,
+    "title": "On distributed search"
+}'
+curl -XPUT 'n1010:9200/blog/post/3'  -d '
+{
+   "user": "dilbert",
+    "postDate": "2011-12-10",
+    "body": "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat" ,
+    "title": "Lorem ipsum"
+}'
+
+curl -XGET 'http://n1010:9200/blog/post/1?pretty=true'
+curl -XGET 'http://n1010:9200/blog/post/2?pretty=true'
+curl -XGET 'http://n1010:9200/blog/post/3?pretty=true'
+
+# search user dilbert
+curl -XGET 'http://n1010:9200/blog/post/_search?q=user:dilbert&pretty=true'
+# all posts that title don't contain 'search'
+curl -XGET 'http://n1010:9200/blog/post/_search?q=-title:search&pretty=true'
+
+# query all
+curl -XGET 'http://n1010:9200/_search' -d '
+{
+    "query": {
+        "match_all": {}
+    }
+}'
+
+# elasticsearch
+PUT <index>/<type>/<id>
+
+PUT <index>/<type>/<id>/_create
+
+# Automatic ID Generation
+POST <index>/<type>/
+
+GET <index>/<type>/<id>/_source
+
+POST _bulk
+{ "index" : { "_index" : "test", "_type" : "type1", "_id" : "1" } }
+{ "field1" : "value1" }
+{ "delete" : { "_index" : "test", "_type" : "type1", "_id" : "2" } }
+{ "create" : { "_index" : "test", "_type" : "type1", "_id" : "3" } }
+{ "field1" : "value3" }
+{ "update" : {"_id" : "1", "_type" : "type1", "_index" : "test"} }
+{ "doc" : {"field2" : "value2"} }
+
+# Get Index
+GET /<index>
+GET /<index>/_settings,_mappings
+
+# elasticsearch 101
+# http://joelabrahamsson.com/elasticsearch-101/
